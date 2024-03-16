@@ -1,0 +1,13 @@
+# Target labels
+ EspIdfBootloader
+# Source files and their labels
+/home/max/zephyrproject/zephyr/samples/heltec-lorawan-node/heltec-lora-v2-zephyr-lorawan-node/build/zephyr/soc/xtensa/esp32/CMakeFiles/EspIdfBootloader
+/home/max/zephyrproject/zephyr/samples/heltec-lorawan-node/heltec-lora-v2-zephyr-lorawan-node/build/zephyr/soc/xtensa/esp32/CMakeFiles/EspIdfBootloader.rule
+/home/max/zephyrproject/zephyr/samples/heltec-lorawan-node/heltec-lora-v2-zephyr-lorawan-node/build/zephyr/soc/xtensa/esp32/CMakeFiles/EspIdfBootloader-complete.rule
+/home/max/zephyrproject/zephyr/samples/heltec-lorawan-node/heltec-lora-v2-zephyr-lorawan-node/build/esp-idf/src/EspIdfBootloader-stamp/EspIdfBootloader-build.rule
+/home/max/zephyrproject/zephyr/samples/heltec-lorawan-node/heltec-lora-v2-zephyr-lorawan-node/build/esp-idf/src/EspIdfBootloader-stamp/EspIdfBootloader-configure.rule
+/home/max/zephyrproject/zephyr/samples/heltec-lorawan-node/heltec-lora-v2-zephyr-lorawan-node/build/esp-idf/src/EspIdfBootloader-stamp/EspIdfBootloader-download.rule
+/home/max/zephyrproject/zephyr/samples/heltec-lorawan-node/heltec-lora-v2-zephyr-lorawan-node/build/esp-idf/src/EspIdfBootloader-stamp/EspIdfBootloader-install.rule
+/home/max/zephyrproject/zephyr/samples/heltec-lorawan-node/heltec-lora-v2-zephyr-lorawan-node/build/esp-idf/src/EspIdfBootloader-stamp/EspIdfBootloader-mkdir.rule
+/home/max/zephyrproject/zephyr/samples/heltec-lorawan-node/heltec-lora-v2-zephyr-lorawan-node/build/esp-idf/src/EspIdfBootloader-stamp/EspIdfBootloader-patch.rule
+/home/max/zephyrproject/zephyr/samples/heltec-lorawan-node/heltec-lora-v2-zephyr-lorawan-node/build/esp-idf/src/EspIdfBootloader-stamp/EspIdfBootloader-update.rule
