@@ -21,11 +21,11 @@
 					  0x82, 0xa9, 0x3f, 0x68, 0x05, 0x9a,\
 					  0x1b, 0xe4, 0xc4, 0xeb }
 
-#define DELAY K_MSEC(1000)
+#define DELAY K_MSEC(5000)
 
 #define CONFIG_LORAMAC_REGION_US915 1
 
-#define LOG_LEVEL CONFIG_LOG_DEFAULT_LEVEL
+#define LOG_LEVEL 4
 #include <zephyr/logging/log.h>
 LOG_MODULE_REGISTER(lorawan_class_a);
 
@@ -137,7 +137,7 @@ int main(void)
 	LOG_INF("Sending data...");
 	while (1) {
 		ret = lorawan_send(2, data, sizeof(data),
-				   LORAWAN_MSG_UNCONFIRMED);
+				   LORAWAN_MSG_CONFIRMED);
 
 		/*
 		 * Note: The stack may return -EAGAIN if the provided data
@@ -153,7 +153,7 @@ int main(void)
 
 		if (ret < 0) {
 			LOG_ERR("lorawan_send failed: %d", ret);
-			return 0;
+			continue;
 		}
 
 		LOG_INF("Data sent!");
