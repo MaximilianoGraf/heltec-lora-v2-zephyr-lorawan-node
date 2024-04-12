@@ -7,9 +7,11 @@
 #include <zephyr/kernel.h>
 #include <zephyr/drivers/lora.h>
 #include <zephyr/drivers/gpio.h>
+
 /* Customize based on network configuration */
 
 #define LORAWAN_DEV_EUI			{ 0x70, 0xB3, 0xD5, 0x7E, 0xD0, 0x05, 0xE4, 0x41 }
+
 #define LORAWAN_JOIN_EUI		{ 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }
 
 #define LORAWAN_APP_KEY			{ 0x37, 0xa1, 0xec, 0x8c, 0x17, 0x9b, 0x82, 0xa9, 0x3f, 0x68, 0x05, 0x9a, 0x1b, 0xe4, 0xc4, 0xeb }
@@ -21,8 +23,13 @@
 #include <zephyr/logging/log.h>
 LOG_MODULE_REGISTER(lorawan_class_a);
 
+/* Dataset */
+
 char original_data[] = {0xca, 0xfe, 0xc0, 0xc0, 0xff};
 char modified_data[] = {0xc0, 0xc0, 0x10, 0xc0, 0xff};
+
+char sensor_data[] = {0xDB, 0x0F, 0x49, 0x41, 0xDB, 0x0F, 0x49, 0x40, 0x01, 0x00};
+
 char* data = original_data;
 
 /* The devicetree node identifier for the "sw0" alias. */
@@ -34,16 +41,6 @@ char* data = original_data;
 static const struct gpio_dt_spec button = GPIO_DT_SPEC_GET(SW0_NODE, gpios);
 static struct gpio_callback button_cb_data;
 
-/* The devicetree node identifier for the "led0" alias. */
-#define LED0_NODE DT_ALIAS(led0)
-#if !DT_NODE_HAS_STATUS(LED0_NODE, okay)
-#error "Unsupported board: led0 devicetree alias is not defined"
-#endif
-
-
-/* A build error on this line means your board is unsupported. */
-static struct gpio_dt_spec led = GPIO_DT_SPEC_GET(LED0_NODE, gpios);
-
 void button_pressed(const struct device *dev, struct gpio_callback *cb, uint32_t pins)
 {
 	printk("Button pressed at %" PRIu32 "\n", k_cycle_get_32());
@@ -51,6 +48,14 @@ void button_pressed(const struct device *dev, struct gpio_callback *cb, uint32_t
 	data = modified_data;
 }
 
+/* The devicetree node identifier for the "led0" alias. */
+#define LED0_NODE DT_ALIAS(led0)
+#if !DT_NODE_HAS_STATUS(LED0_NODE, okay)
+#error "Unsupported board: led0 devicetree alias is not defined"
+#endif
+
+/* A build error on this line means your board is unsupported. */
+static struct gpio_dt_spec led = GPIO_DT_SPEC_GET(LED0_NODE, gpios);
 
 
 static void dl_callback(uint8_t port, bool data_pending,
@@ -86,7 +91,6 @@ static void lorwan_datarate_changed(enum lorawan_datarate dr)
 int main(void)
 {
 	int ret;
-
 
 	//button config
 	if (!gpio_is_ready_dt(&button)) {
@@ -218,7 +222,7 @@ int main(void)
 		//TODO
 		
 		//sending data
-		ret = lorawan_send(2, data, sizeof(data), LORAWAN_MSG_CONFIRMED);
+		ret = lorawan_send(2, sensor_data, sizeof(sensor_data), LORAWAN_MSG_CONFIRMED);
 
 		/*
 		 * Note: The stack may return -EAGAIN if the provided data
@@ -242,8 +246,7 @@ int main(void)
 		//restoring data, if the button is presseed, then the payload will change
 		data = original_data;
 
-		//TODO entering to low power mode
-	
+		//TODO entering to low power mode	
 		k_sleep(DELAY);
 	}
 }
