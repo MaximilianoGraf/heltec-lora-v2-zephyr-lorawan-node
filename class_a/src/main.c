@@ -14,9 +14,9 @@
 
 #define LORAWAN_JOIN_EUI		{ 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }
 
-#define LORAWAN_APP_KEY			{ 0x37, 0xa1, 0xec, 0x8c, 0x17, 0x9b, 0x82, 0xa9, 0x3f, 0x68, 0x05, 0x9a, 0x1b, 0xe4, 0xc4, 0xeb }
+#define LORAWAN_APP_KEY			{ 0x37, 0xA1, 0xEC, 0x8C, 0x17, 0x9B, 0x82, 0xA9, 0x3F, 0x68, 0x05, 0x9A, 0x1B, 0xE4, 0xC4, 0xEB }
 
-#define DELAY K_MSEC(10000)
+#define DELAY K_MSEC(5000)
 #define LORAWAN_JOIN_RETRY_DELAY K_MSEC(2000)
 
 #define LOG_LEVEL CONFIG_LOG_DEFAULT_LEVEL
@@ -28,14 +28,27 @@ LOG_MODULE_REGISTER(lorawan_class_a);
 char original_data[] = {0xca, 0xfe, 0xc0, 0xc0, 0xff};
 char modified_data[] = {0xc0, 0xc0, 0x10, 0xc0, 0xff};
 
-char sensor_data[] = {0xDB, 0x0F, 0x49, 0x41, 0xDB, 0x0F, 0x49, 0x40, 0x01, 0x00};
+char sensor_data_orig[] = {0xDB, 0x0F, 0x49, 0x41, 0xDB, 0x0F, 0x49, 0x40, 0x01, 0x00};
+char sensor_data_mod[] = {0xDC, 0x10, 0x4A, 0x42, 0xDC, 0x10, 0x4A, 0x41, 0x02, 0x00};
 
-char* data = original_data;
+char* data = sensor_data_orig;
 
 /* The devicetree node identifier for the "sw0" alias. */
 #define SW0_NODE DT_ALIAS(sw0)
 #if !DT_NODE_HAS_STATUS(SW0_NODE, okay)
 #error "Unsupported board: sw0 devicetree alias is not defined"
+#endif
+
+/* The devicetree node identifier for the "led0" alias. */
+#define LED0_NODE DT_ALIAS(led0)
+#if !DT_NODE_HAS_STATUS(LED0_NODE, okay)
+#error "Unsupported board: led0 devicetree alias is not defined"
+#endif
+
+/* The devicetree node identifier for the "lora0" alias. */
+#define LORA_NODE DT_ALIAS(lora0)
+#if !DT_NODE_HAS_STATUS(LORA_NODE, okay)
+#error "Unsupported board: lora0 devicetree alias is not defined"
 #endif
 
 static const struct gpio_dt_spec button = GPIO_DT_SPEC_GET(SW0_NODE, gpios);
@@ -45,14 +58,8 @@ void button_pressed(const struct device *dev, struct gpio_callback *cb, uint32_t
 {
 	printk("Button pressed at %" PRIu32 "\n", k_cycle_get_32());
 	//next message payload will change
-	data = modified_data;
+	data = sensor_data_mod;
 }
-
-/* The devicetree node identifier for the "led0" alias. */
-#define LED0_NODE DT_ALIAS(led0)
-#if !DT_NODE_HAS_STATUS(LED0_NODE, okay)
-#error "Unsupported board: led0 devicetree alias is not defined"
-#endif
 
 /* A build error on this line means your board is unsupported. */
 static struct gpio_dt_spec led = GPIO_DT_SPEC_GET(LED0_NODE, gpios);
@@ -65,13 +72,14 @@ static void dl_callback(uint8_t port, bool data_pending,
 	LOG_INF("Port %d, Pending %d, RSSI %ddB, SNR %ddBm", port, data_pending, rssi, snr);
 	if (data != NULL) 
 	{
-		gpio_pin_toggle_dt(&led);
+		
 		LOG_HEXDUMP_INF(data, len, "Payload: ");
 		
 		//TODO this is the correct place to decode incoming messages and act. 
 		if (memcmp(data, modified_data, sizeof(modified_data)) == 0)
 		{
-			LOG_INF(" 0xCOCO10C0 command received ");
+			LOG_INF(" 0xCOCO10C0FF command received ");
+			gpio_pin_toggle_dt(&led);
 		}
 		else
 		{
@@ -222,7 +230,7 @@ int main(void)
 		//TODO
 		
 		//sending data
-		ret = lorawan_send(2, sensor_data, sizeof(sensor_data), LORAWAN_MSG_CONFIRMED);
+		ret = lorawan_send(2, data, sizeof(sensor_data_orig), LORAWAN_MSG_CONFIRMED);
 
 		/*
 		 * Note: The stack may return -EAGAIN if the provided data
@@ -244,7 +252,7 @@ int main(void)
 		LOG_INF("Data sent!");
 
 		//restoring data, if the button is presseed, then the payload will change
-		data = original_data;
+		data = sensor_data_orig;
 
 		//TODO entering to low power mode	
 		k_sleep(DELAY);
